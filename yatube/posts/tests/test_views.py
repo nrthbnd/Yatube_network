@@ -260,14 +260,14 @@ class PaginatorViewsTests(TestCase):
         cls.count_post = Post.objects.count()
 
     def setUp(self):
-        self.guest_client = Client()
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
         cache.clear()
 
     def test_first_page_contains_ten_records(self):
         """На первой странице отображается 10 постов."""
-        response_main_page = self.guest_client.get(reverse('posts:main_page'))
+        response_main_page = self.authorized_client.get(
+            reverse('posts:main_page'))
         response_group_list = self.authorized_client.get(
             reverse('posts:group_list',
                     kwargs={'slug': f'{self.group.slug}'}))
@@ -290,7 +290,7 @@ class PaginatorViewsTests(TestCase):
 
     def test_second_page_contains_three_records(self):
         """На второй странице отображается 3 поста."""
-        response_main_page = self.guest_client.get(
+        response_main_page = self.authorized_client.get(
             reverse('posts:main_page') + '?page=2')
         response_group_list = self.authorized_client.get(
             reverse(
