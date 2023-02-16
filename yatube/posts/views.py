@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import cache_page
 
 from .forms import PostForm, CommentForm
-from .models import Comment, Group, Follow, Post, User
+from .models import Group, Follow, Post, User
 
 
 SYMBOLS_FOR_TITLE = 100
