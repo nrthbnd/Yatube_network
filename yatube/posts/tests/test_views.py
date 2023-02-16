@@ -395,3 +395,17 @@ class FollowTests(TestCase):
         posts = self.authorized_client.get(
             self.URL_FOLLOW_INDEX).context.get('page_obj').object_list
         self.assertNotIn(not_following_post, posts)
+
+    def test_follow_yourself(self):
+        """Авторизованный пользователь не может подписаться на самого себя."""
+        author_user = User.objects.create(username='author_user')
+        self.authorized_client.force_login(author_user)
+        test_count_1 = Follow.objects.filter(
+            user=author_user, author=author_user).count()
+        self.authorized_client.get(
+            reverse(
+                'posts:profile_follow',
+                args=(author_user.username,)))
+        test_count_2 = Follow.objects.filter(
+            user=author_user, author=author_user).count()
+        self.assertEqual(test_count_1, test_count_2)
