@@ -39,6 +39,22 @@ class PostFormTests(TestCase):
             text='Тестовый комментарий',
         )
         cls.form = PostForm()
+        cls.URL_POST_DETAIL = reverse(
+            'posts:post_detail',
+            kwargs={'post_id': f'{PostFormTests.post.pk}'})
+        cls.URL_ADD_COMMENT = reverse(
+            'posts:add_comment',
+            kwargs={'post_id': f'{PostFormTests.post.pk}'})
+        cls.URL_POST_CREATE = reverse('posts:post_create')
+        cls.URL_PROFILE = reverse(
+            'posts:profile',
+            kwargs={'username': PostFormTests.post.author.username})
+        cls.URL_POST_EDIT = reverse(
+            'posts:post_edit',
+            kwargs={'post_id': PostFormTests.post.pk})
+        cls.URL_POST_DETAIL = reverse(
+            'posts:post_detail', kwargs={'post_id': PostFormTests.post.pk})
+        cls.URL_LOGIN = reverse('users:login')
 
     @classmethod
     def tearDownClass(cls):
@@ -59,14 +75,12 @@ class PostFormTests(TestCase):
             'group': self.group.pk,
         }
         response = self.authorized_client.post(
-            reverse('posts:post_create'),
+            self.URL_POST_CREATE,
             data=form_data,
             follow=True,
         )
         new_post = Post.objects.exclude(pk__in=old_ids).first()
-        self.assertRedirects(response, reverse(
-            'posts:profile',
-            kwargs={'username': self.post.author.username}))
+        self.assertRedirects(response, self.URL_PROFILE)
         self.assertEqual(Post.objects.count(), posts_count + 1,
                          'Кол-во постов должно увеличиться на 1.')
         self.assertEqual(new_post.text, form_data['text'],
@@ -99,7 +113,7 @@ class PostFormTests(TestCase):
             'image': uploaded,
         }
         response = self.authorized_client.post(
-            reverse('posts:post_create'),
+            self.URL_POST_CREATE,
             data=form_data,
             follow=True,
         )
@@ -129,16 +143,13 @@ class PostFormTests(TestCase):
             'group': PostFormTests.group.pk,
         }
         response = self.authorized_client.post(
-            reverse('posts:post_edit',
-                    kwargs={'post_id': self.post.pk}),
+            self.URL_POST_EDIT,
             data=form_data,
             follow=True,
         )
         self.post.refresh_from_db()
         edited_post = Post.objects.get(pk=self.post.pk)
-        self.assertRedirects(response, reverse(
-            'posts:post_detail', kwargs={'post_id': self.post.pk}))
-
+        self.assertRedirects(response, self.URL_POST_DETAIL)
         self.assertEqual(Post.objects.count(), posts_count,
                          'При редактировании поста кол-во постов не меняется.')
         self.assertEqual(response.status_code, HTTPStatus.OK,
@@ -147,7 +158,7 @@ class PostFormTests(TestCase):
                          'Некорректно откорректирован пост (текст).')
         self.assertEqual(edited_post.group.pk, form_data['group'],
                          'Некорректно откорректирован пост (группа).')
-        self.assertEqual(PostFormTests.user.username,
+        self.assertEqual(self.user.username,
                          edited_post.author.username,
                          'Некорректно откорректирован пост (группа).')
 
@@ -159,39 +170,40 @@ class PostFormTests(TestCase):
             'group': self.group.pk,
         }
         response = self.guest_client.post(
-            reverse('posts:post_create'),
+            self.URL_POST_CREATE,
             data=form_data,
             follow=True,
         )
         self.assertRedirects(
             response,
-            reverse('users:login') + '?next=' + reverse('posts:post_create'))
+            self.URL_LOGIN + '?next=' + self.URL_POST_CREATE)
         self.assertEqual(Post.objects.count(), posts_count,
                          'Ошибка. Новый пост не должен создаваться.')
 
     def test_add_comment(self):
         """Валидная форма добавляет комментарий"""
         comments_count = Comment.objects.count()
+        old_comments = list(Comment.objects.values_list('pk', flat=True))
         form_data = {
             'text': 'Тестовый комментарий',
             'post': self.post,
             'author': self.user,
         }
         response = self.authorized_client.post(
-            reverse(
-                'posts:add_comment', kwargs={'post_id': f'{self.post.pk}'}),
+            self.URL_ADD_COMMENT,
             data=form_data,
             follow=True,
         )
+        new_comment = Comment.objects.exclude(pk__in=old_comments).first()
         self.assertRedirects(
-            response,
-            reverse('posts:post_detail',
-                    kwargs={'post_id': f'{self.post.pk}'}))
+            response, self.URL_POST_DETAIL)
         self.assertEqual(Comment.objects.count(), comments_count + 1)
-        self.assertTrue(
-            Comment.objects.filter(
-                text=form_data['text'],
-                post=form_data['post'],
-                author=PostFormTests.user,
-            ).exists()
-        )
+        self.assertEqual(
+            new_comment.post, form_data['post'],
+            'Некорректно создан новый комментарий (не тот пост).')
+        self.assertEqual(
+            new_comment.text, form_data['text'],
+            'Некорректно создан новый комментарий (не тот текст).')
+        self.assertEqual(
+            new_comment.author.username, form_data['author'].username,
+            'Некорректно создан новый комментарий (не тот автор).')
