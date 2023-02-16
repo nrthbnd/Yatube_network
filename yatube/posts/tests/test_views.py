@@ -105,9 +105,7 @@ class PostViewsTests(TestCase):
 
     def test_profile_page_shows_correct_context(self):
         """Шаблон profile сформирован с правильным контекстом."""
-        response = (self.authorized_client.get(
-            reverse('posts:profile',
-                    kwargs={'username': self.user.username})))
+        response = (self.authorized_client.get(self.URL_PROFILE))
         self.assertEqual(
             response.context.get('author').username,
             self.user.username)
@@ -122,7 +120,7 @@ class PostViewsTests(TestCase):
 
     def test_post_create_page_shows_correct_context(self):
         """Шаблон post_create сформирован с правильным контекстом."""
-        response = self.authorized_client.get(reverse('posts:post_create'))
+        response = self.authorized_client.get(self.URL_POST_CREATE)
         form_fields = {
             'text': forms.fields.CharField,
             'group': forms.ModelChoiceField,
@@ -134,9 +132,7 @@ class PostViewsTests(TestCase):
 
     def test_post_edit_page_shows_correct_context(self):
         """Шаблон post_edit сформирован с правильным контекстом."""
-        response = (self.authorized_client.get(
-            reverse('posts:post_edit',
-                    kwargs={'post_id': self.post.pk})))
+        response = self.authorized_client.get(self.URL_POST_EDIT)
         form_fields = {
             'text': forms.fields.CharField,
             'group': forms.ModelChoiceField,
@@ -151,9 +147,7 @@ class PostViewsTests(TestCase):
         response_main_page = self.authorized_client.get(self.URL_MAIN_PAGE)
         response_group_list = self.authorized_client.get(
             reverse('posts:group_list', kwargs={'slug': f'{self.group.slug}'}))
-        response_profile = self.authorized_client.get(
-            reverse('posts:profile',
-                    kwargs={'username': f'{self.user.username}'}))
+        response_profile = self.authorized_client.get(self.URL_PROFILE)
 
         main_page = response_main_page.context['page_obj'][0]
         group_list = response_group_list.context['page_obj'][0]
@@ -186,43 +180,27 @@ class PostViewsTests(TestCase):
         )
         self.assertEqual(post_with_image, response.context['post'])
 
-    def test_comment_create_correct_pages(self):
+    def test_new_comment_create_correct_pages(self):
         """После успешной отправки комментарий появляется на странице поста"""
-        new_post = Post.objects.create(
-            text='Текст нового поста',
-            author=self.user,
-            group=self.group,
-        )
-        new_comment = Comment.objects.create(
-            text='Текст нового комментария',
-            author=self.user,
-            post=new_post,
-        )
-        response = self.authorized_client.get(
-            reverse(
-                'posts:post_detail',
-                kwargs={'post_id': f'{new_post.pk}'}))
-        self.assertEqual(response.context['comment'][0], new_comment)
+        response = self.authorized_client.get(self.URL_POST_DETAIL)
+        self.assertEqual(response.context['comment'][0], self.comment)
 
     def test_main_page_cached(self):
         """Проверка кеширования страницы main_page."""
-
         test_post = Post.objects.create(
             text='Тестовый пост для тестирования кэша.',
             author=self.user,
         )
-        response = self.authorized_client.get(reverse('posts:main_page'))
+        response = self.authorized_client.get(self.URL_MAIN_PAGE)
         Post.objects.filter(pk=test_post.pk).delete()
-        response_after_delete = self.authorized_client.get(
-            reverse('posts:main_page')
-        )
+        response_after_delete = self.authorized_client.get(self.URL_MAIN_PAGE)
         self.assertEqual(response.content, response_after_delete.content)
 
         cache.clear()
 
         response_after_cache_clear = self.authorized_client.get(
-            reverse('posts:main_page')
-        )
+            self.URL_MAIN_PAGE)
+
         self.assertNotEqual(
             response.content,
             response_after_cache_clear.content
@@ -259,6 +237,14 @@ class PaginatorViewsTests(TestCase):
         Post.objects.bulk_create(number_of_posts)
         cls.count_post = Post.objects.count()
 
+        cls.URL_MAIN_PAGE = reverse('posts:main_page')
+        cls.URL_GROUP_LIST = reverse(
+            'posts:group_list',
+            kwargs={'slug': f'{PaginatorViewsTests.group.slug}'})
+        cls.URL_PROFILE = reverse(
+            'posts:profile',
+            kwargs={'username': f'{PaginatorViewsTests.user.username}'})
+
     def setUp(self):
         self.authorized_client = Client()
         self.authorized_client.force_login(self.user)
@@ -291,15 +277,11 @@ class PaginatorViewsTests(TestCase):
     def test_second_page_contains_three_records(self):
         """На второй странице отображается 3 поста."""
         response_main_page = self.authorized_client.get(
-            reverse('posts:main_page') + '?page=2')
+            self.URL_MAIN_PAGE + '?page=2')
         response_group_list = self.authorized_client.get(
-            reverse(
-                'posts:group_list',
-                kwargs={'slug': f'{self.group.slug}'}) + '?page=2')
+            self.URL_GROUP_LIST + '?page=2')
         response_profile = self.authorized_client.get(
-            reverse(
-                'posts:profile',
-                kwargs={'username': f'{self.user.username}'}) + '?page=2')
+            self.URL_PROFILE + '?page=2')
 
         self.assertEqual(len(
             response_main_page.context['page_obj']),
@@ -320,7 +302,7 @@ class FollowTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create(username='HasNoName')
-        cls.following1 = User.objects.create(username='fol1')
+        cls.foll_user = User.objects.create(username='Following_User')
         cls.group = Group.objects.create(
             title='Группа',
             slug='test_group',
@@ -331,10 +313,10 @@ class FollowTests(TestCase):
             author=cls.user)
         cls.URL_POST_PROFILE_FOLLOW = reverse(
             'posts:profile_follow',
-            kwargs={'username': FollowTests.following1.username})
+            kwargs={'username': FollowTests.foll_user.username})
         cls.URL_POST_PROFILE_UNFOLLOW = reverse(
             'posts:profile_unfollow',
-            kwargs={'username': FollowTests.following1.username})
+            kwargs={'username': FollowTests.foll_user.username})
         cls.URL_FOLLOW_INDEX = reverse('posts:follow_index')
 
     def setUp(self):
@@ -345,36 +327,36 @@ class FollowTests(TestCase):
     def test_follow(self):
         """Авторизованный пользователь может подписываться
         на других пользователей."""
-        self.assertEqual(self.following1.following.count(), 0)
+        follows_count = Follow.objects.count()
         self.authorized_client.get(self.URL_POST_PROFILE_FOLLOW)
-        self.assertEqual(self.following1.following.count(), 1)
+        self.assertEqual(Follow.objects.count(), follows_count + 1)
         follow_link = Follow.objects.filter(
-            author=self.following1, user=self.user,
-        )
+            author=self.foll_user,
+            user=self.user)
         self.assertEqual(len(follow_link), 1)
-        self.assertEqual(follow_link[0].author, self.following1)
+        self.assertEqual(follow_link[0].author, self.foll_user)
         self.assertEqual(follow_link[0].user, self.user)
 
     def test_unfollow(self):
         """Авторизованный пользователь может удалять
         пользователей из подписок."""
         Follow.objects.create(
-            author=self.following1,
+            author=self.foll_user,
             user=self.user,
         )
-        self.assertEqual(self.following1.following.count(), 1)
+        follows_count = Follow.objects.count()
         self.authorized_client.get(self.URL_POST_PROFILE_UNFOLLOW)
-        self.assertEqual(self.following1.following.count(), 0)
+        self.assertEqual(Follow.objects.count(), follows_count - 1)
 
     def test_follower_index(self):
         """Новая запись пользователя появляется в ленте тех,
         кто на него подписан."""
         Follow.objects.create(
-            author=self.following1,
+            author=self.foll_user,
             user=self.user,
         )
         following_post = Post.objects.create(
-            author=self.following1,
+            author=self.foll_user,
             text='Ты на меня подписан',
         )
         posts = self.authorized_client.get(
@@ -386,7 +368,7 @@ class FollowTests(TestCase):
         кто на него не подписан."""
         Follow.objects.create(
             author=self.user,
-            user=self.following1,
+            user=self.foll_user,
         )
         not_following_post = Post.objects.create(
             author=self.user,
@@ -398,14 +380,13 @@ class FollowTests(TestCase):
 
     def test_follow_yourself(self):
         """Авторизованный пользователь не может подписаться на самого себя."""
-        author_user = User.objects.create(username='author_user')
-        self.authorized_client.force_login(author_user)
-        test_count_1 = Follow.objects.filter(
-            user=author_user, author=author_user).count()
-        self.authorized_client.get(
-            reverse(
-                'posts:profile_follow',
-                args=(author_user.username,)))
-        test_count_2 = Follow.objects.filter(
-            user=author_user, author=author_user).count()
-        self.assertEqual(test_count_1, test_count_2)
+        follows_count_1 = Follow.objects.filter(
+            user=self.user,
+            author=self.user,
+        ).count()
+        self.authorized_client.get(self.URL_POST_PROFILE_FOLLOW)
+        follows_count_2 = Follow.objects.filter(
+            user=self.user,
+            author=self.user,
+        ).count()
+        self.assertEqual(follows_count_1, follows_count_2)

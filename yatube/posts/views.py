@@ -41,11 +41,9 @@ def group_posts(request, slug):
 def profile(request, username):
     """Профиль пользователя."""
     author = get_object_or_404(User, username=username)
-    posts = Post.objects.filter(author=author)
+    posts = author.posts.all()
     count = posts.count()
-    paginator = Paginator(posts, settings.AMOUNT_OF_POSTS)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    page_obj = paginator(request, posts)
     following = request.user.is_authenticated and Follow.objects.filter(
         user=request.user, author=author).exists()
     context = {
@@ -60,7 +58,7 @@ def profile(request, username):
 def post_detail(request, post_id):
     """Страница конкретного поста."""
     post = get_object_or_404(Post, pk=post_id)
-    comment = Comment.objects.filter(post=post)
+    comment = post.comments.all()
     form = CommentForm(request.POST or None)
     context = {
         'post': post,
