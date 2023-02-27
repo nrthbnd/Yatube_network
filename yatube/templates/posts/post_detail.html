@@ -17,7 +17,7 @@
       {% endthumbnail %}
       <p>{{ post.text|linebreaksbr }}</p>
       {% if post.author == user %}
-        <a class="btn btn-primary" href="{% url 'posts:post_edit' post.id %}">
+        <a class="btn btn-primary" href="{% url 'posts:post_edit' post.id %}" style="background-color: #437A16">
           редактировать запись
         </a> 
       {% endif %}

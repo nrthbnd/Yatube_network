@@ -1,6 +1,7 @@
 {% load static %}
 <header>
-  <nav class="navbar navbar-light" style="background-color: lightskyblue">
+  <link rel="stylesheet" href="{% static 'css/header.css' %}">
+  <nav class="navbar navbar-light" style="background-color: #B7D0BD">
     <div class="container">
       <a class="navbar-brand" href="{% url 'posts:main_page' %}">
         <img src="{% static 'img/logo.png' %}" width="30" height="30" class="d-inline-block align-top" alt="">
@@ -9,14 +10,14 @@
       <ul class="nav nav-pills">
         {% with request.resolver_match.view_name as view_name %}
         <li class="nav-item"> 
-          <a class="nav-link {% if view_name  == 'about:author' %}active{% endif %}"
+          <a class="nav-link "style="color: #437A16" {% if view_name  == 'about:author' %}active{% endif %}"
             href="{% url 'about:author' %}"
           >
           Об авторе
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link {% if view_name  == 'about:tech' %}active{% endif %}"
+          <a class="nav-link "style="color: #437A16" {% if view_name  == 'about:tech' %}active{% endif %}"
             href="{% url 'about:tech' %}"
           >
           Технологии
@@ -24,8 +25,8 @@
         </li>
         {% if user.is_authenticated %}
           <li class="nav-item"> 
-            <a class="nav-link {% if view_name  == 'posts:post_create' %}active{% endif %}"
-            href="{% url 'posts:post_create' %}"
+            <a class="nav-link "style="color: #437A16" {% if view_name  == 'posts:post_create' %}active{% endif %}"
+              href="{% url 'posts:post_create' %}"
             >
               Новая запись
             </a>
@@ -44,8 +45,12 @@
             Выйти
             </a>
           </li>
-          <li>
+          <li class="nav-item">
+            <a class="nav-link text-dark {% if view_name  == 'posts:profile' %}active{% endif %}"
+            href="{% url 'posts:profile' user.username %}"
+            >
             Пользователь: {{ user.username }}
+            </a>
           </li>
         {% else %}
           <li class="nav-item"> 

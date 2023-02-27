@@ -1,31 +1,31 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Технологии{% endblock %}
+
 {% block content %}
-{% comment %} Колонки с отступом сверху и снизу {% endcomment %}
+<head>
+  <link rel="stylesheet" href="{% static 'css/tech.css' %}">
+</head>
   <div class="row">
-    <h1>Вот что я умею</h1>
-    {% comment %}
-      Боковой блок со списком технологий 
-      Займет всю ширину блока на мобильном
-      и 25% при размерах экрана ≥768px
-    {% endcomment %}
-    <aside class="col-12 col-md-3">
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">
-          Python
-        </li>
-        <li class="list-group-item">
-          Django
-        </li>
+    <aside class="col-12 col-md-2">
+    </aside>
+    <aside class="col-12 col-md-8" align="left">
+      <h2>При работе над этим проектом я изучила:</h2>
+      <br><br>
+      <ul class="list-group list-group-flush" align="center">
+        <li class="list-group-item">Python</li>
+        <li class="list-group-item">Django</li>
+        <li class="list-group-item">HTML</li>
+        <li class="list-group-item">CSS</li>
+        <li class="list-group-item">SQL</li>
+        <li class="list-group-item">Bootstrap</li>
+        <li class="list-group-item">Unittest</li>
+        <li class="list-group-item">Pythonanywhere</li>
       </ul>
     </aside>
-    {% comment %}
-      Статья  
-      Займет всю ширину блока на мобильном
-      и 75% при размерах экрана ≥768px
-    {% endcomment %}
-    <article class="col-12 col-md-9">
-      <p>Текст страницы "Технологии"</p>
+
+    <article class="col-12 col-md-2">
+      <p></p>
     </article>
   </div>
 {% endblock %}

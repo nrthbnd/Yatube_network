@@ -1,9 +1,48 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Об авторе проекта{% endblock %}
+
 {% block content %}
-<h1>Привет, я автор</h1>
-<p>
-  Тут я размещу информацию о себе, используя свои умения верстать.
-  Картинки, блоки, элементы бустрап. А может быть, просто напишу несколько абзацев текста. 
-</p>
+<head>
+  <link rel='stylesheet' href='{% static 'css/author.css' %}'>
+</head>
+<div class='row'>
+  <aside class="col-12 col-md-2">
+  </aside>
+  <article class="col-12 col-md-8">
+    <h2 align='left'>Привет, я автор</h2>
+    <p align='center'>
+    Меня зовут Анастасия Боль. Я начинающий бэкенд-разработчик. Этот сайт - 
+    знак того, что я дошла до конца первого этапа моего обучения в Яндекс Практикуме.
+    Я очень надеюсь, что о своих следующих достижениях я буду писать именно тут.
+    За безграничную помощь и поддержку в этом нелегком начинании я благодарю команду 
+    Практикума и моих одногруппников.</p>
+    <p align='center'>
+    Спасибо, что нашли время посетить мой сайт. Если у вас есть какие-либо вопросы или комментарии, пожалуйста,
+    не стесняйтесь обращаться ко мне, используя информацию в конце этой странички.
+    Я буду очень рада, если Вы зарегистрируетесь и оставите запись на моем сайте.
+    Буду особенно рада, если вы загрузите фотографию своего питомца в одну из тематических групп.<br>
+    Благодарю за посещение! Для меня это очень важно. 
+    <br><br><br><br>
+    </p>
+  </article>
+  <aside class='col-12 col-md-2'>
+  </aside>
+</div>
+<div class='container'>
+<div class='row justify-content-start'>
+  <aside class='col-12 col-md-2'>
+  </aside>
+  <div class='col-3'>
+  <article>
+    <p align='left'>Связаться со мной:</p>
+    <ul>
+      <li><a class='special-links' href='https://github.com/nrthbnd'>GitHub</a></li>
+      <li><a class='special-links' href='https://www.linkedin.com/in/anastasiia-bol/?locale=en_US'>LinkedIn</a></li>
+      <li><a class='special-links' href='https://t.me/nrthbnd'>Telegram</a></li>
+    </ul>
+  </article>
+  </div>
+</div>
+</div>
 {% endblock %}
