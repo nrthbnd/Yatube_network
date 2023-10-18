@@ -1,5 +1,5 @@
 # yatube_project
-*Социальная сеть Yatube.* [Go to website](http://nrthbnd.pythonanywhere.com/)
+Социальная сеть Yatube.  [Go to website](http://nrthbnd.pythonanywhere.com/)
 
 ### Автор
 Анастасия Боль - [GitHub](https://github.com/nrthbnd)
