@@ -1,6 +1,8 @@
 # yatube_project
-*Социальная сеть Yatube.*
+*Социальная сеть Yatube.* [Go to website](http://nrthbnd.pythonanywhere.com/)
 
+### Автор
+Анастасия Боль - [GitHub](https://github.com/nrthbnd)
 
 ## Описание
 Этот проект был выполнен в рамках обучения бэкенд-разработке на Python в Яндекс.Практикуме. Я много старалась и рада представить свой проект - социальную сеть Yatube.
@@ -32,6 +34,3 @@ pip install -r requirements.txt
 ```
 python3 manage.py runserver
 ```
-
-### Авторы
-Анастасия Боль
